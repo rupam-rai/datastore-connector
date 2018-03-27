@@ -1,0 +1,74 @@
+resources:
+- name: openbank_apis 
+  type: solutions.api
+  properties:
+    inputs:
+    - name: org
+      prompt: Edge Org name
+    - name: username
+      prompt: Username
+      ifNotPresent: token
+    - name: password
+      prompt: Password
+      hidden: true
+      ifNotPresent: token
+    - name: env
+      prompt: Edge Org Environment
+    
+    configurations:
+    - env: test
+      edge_host: https://api.enterprise.apigee.com
+
+    - env : prod
+      edge_host: https://api.enterprise.apigee.com
+
+    edgeOrg:
+    script: gulpfile.js
+    basePath: .
+    subResources:
+    - name: message_kvm
+      type: kvm
+      items:
+      - name: GoogleServiceAccountKVM
+        payload: '{ "name" : "GoogleServiceAccountKVM", "entry" : [ { "name" : "privateKey", "value" : "{{ serviceaccount_Private_Key }}" } ] , "encrypted": "true"}' 
+    
+    - name: replaceGoogleProject
+      type: configSubstitutions
+      items: 
+      - name: datastoreProject
+        filePaths: ['src/gateway/datastore-connector/target/apiproxy/targets/default.xml','src/gateway/datastore-connector/target/apiproxy/policies/Service-Callout-Get-Entity.xml']
+        value: '{{ datastoreProject }}'
+      - name: client_email
+        filePaths: ['src/gateway/datastore-connector/target/apiproxy/policies/Generate-JWT-Datastore.xml']
+        value: '{{ client_email }}'
+      - name: token_uri
+        filePaths: ['src/gateway/datastore-connector/target/apiproxy/policies/Generate-JWT-Datastore.xml','src/gateway/datastore-connector/target/apiproxy/policies/Service-Callout-Get-Access-Token.xml']
+        value: '{{ token_uri }}'
+
+    - name: datastore-connector api
+      type: proxy
+      items: 
+      - name: datastore-connector
+        apiName: Datastorev1.0.1Connector
+
+    - name: developers
+      type: developer
+      items:
+      - payload: '{"email":"openbank@apigee.net", "firstName":"OpenBank","lastName":"Developer","userName":"openbank"}'
+        email: openbank@apigee.net
+
+    - name: dsApiProducts
+      type: product
+      items:
+      - payload: '{"approvalType":"auto", "attributes":[{"name":"access","value":"private"}], "displayName":"Internal Datastore API","name":"datastore_api","environments":["test","prod"],"scopes":[]}'
+        name: datastore_api
+
+    - name: dsDeveloperApps
+      type: app
+      items:
+      - name: internal_DSappv101
+        payload: '{"name":"internal_DSappv101","callback":"http://localhost/","email":"openbank@apigee.net","apiProducts":"datastore_api"}'
+        assignResponse:
+        - from: credentials.0.consumerKey
+          to: apiKey_DS
+    

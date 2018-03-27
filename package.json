@@ -1,0 +1,21 @@
+{
+  "name": "datastore-connector",
+  "version": "1.0.1",
+  "description": "datastore connector solution in Apigee",
+  "scripts": {
+    "start": "npm install && gulp deploy"
+  },
+  "dependencies": {
+    "async": "*",
+    "edge-launchpad": "^2.0.2",
+    "gulp-eslint": "^4.0.0",
+    "eslint": "^4.9.0",
+    "eslint-config-google": "^0.9.1",
+    "chromedriver": "^2.31.0",
+    "fs": "latest",
+    "gulp": "^3.9.1",
+    "readline" : "*",
+    "gulp-sequence" : "*"
+  },
+  "license": "Apache-2.0"
+}
